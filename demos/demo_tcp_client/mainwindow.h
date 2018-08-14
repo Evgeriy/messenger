@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -35,8 +35,8 @@ private:
     TCPClient*      pClient{nullptr};
     QString         mSelectedUser;
 
-    QStringListModel *pUserListModel{nullptr};
-    QStringListModel *pDialogModel{nullptr};
+    QStringListModel* pUserListModel{nullptr};
+    QStringListModel* pDialogModel{nullptr};
 };
 
 #endif // MAINWINDOW_H

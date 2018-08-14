@@ -16,6 +16,12 @@ public:
     explicit TCPClient(QObject *_parent = nullptr);
     ~TCPClient();
 
+signals:
+    void sendUserProfileToGUI(QString, QString);
+    void sendUserListToGUI(QList<QString>);
+    void sendUserChatsToGUI(QString, QList<QString>);
+    void sendMessageToGUI(QString, QString);
+
 public:
     void connectToServer(const QHostAddress &_hostAddress, const quint16 &_port);
     void connectToServer(const QString &_hostAddressString, const quint16 &_port);
@@ -26,33 +32,19 @@ public:
                         const QString &_secondName,
                         const QString &_password);
     void doAuthorization(const QString &_nik, const QString &_password);
-
-public:
     void loadUserList();
     void loadMessageList(const QString &_user);
-
-public:
-    void findUser(const QString &_user);
     void sendPM(const QString &_to, const QString &_msg);
-
-public:
-    void sendToServer(const QString& _msg);
-
-signals:
-    void sendUserProfileToGUI(QString, QString);
-    void sendUserListToGUI(QList<QString>);
-    void sendUserChatsToGUI(QString, QList<QString>);
-    void sendMessageToGUI(QString, QString);
 
 public slots:
     void onSendUserChatsToGUI(const QString &_user);
 
 private:
-    void receiveRegistrationStatus(QDataStream *stream);
-    void receiveAuthorizationStatus(QDataStream *stream);
-    void receiveUserList(QDataStream *stream);
-    void receiveMessageList(QDataStream *stream);
-    void receiveMessage(QDataStream *stream);
+    void receiveRegistrationStatus(QDataStream &_stream);
+    void receiveAuthorizationStatus(QDataStream &_stream);
+    void receiveUserList(QDataStream &_stream);
+    void receiveMessageList(QDataStream &_stream);
+    void receiveMessage(QDataStream &_stream);
 
 private slots:
     void onConnect();

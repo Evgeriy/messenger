@@ -31,7 +31,18 @@ TCPServer::TCPServer(QObject *_parent, const quint16 &_port) :
 /// \brief TCPServer::~TCPServer
 ///
 TCPServer::~TCPServer() {
+    disconnect(pTcpServer, &QTcpServer::newConnection, this, &TCPServer::onNewConnection);
+    disconnect(this, &TCPServer::sendMessageToDB, pDBManager, &DatabaseManager::insertMessage);
 
+    if (pDBManager != nullptr) {
+        delete pDBManager;
+        pDBManager = nullptr;
+    }
+
+    if (pTcpServer != nullptr) {
+        delete pTcpServer;
+        pTcpServer = nullptr;
+    }
 }
 
 ///
@@ -70,63 +81,21 @@ void TCPServer::onReadyRead() {
         int clientCommand;
         inputDataStream >> clientCommand;
 
-        QString from;
-        QString password;
-        QString to;
-        QString msg;
-        QString firstName;
-        QString secondName;
-        bool isAuth;
-        QList<QString> userList;
-        QList<QString> messageList;
-        QString        message;
-
         switch (clientCommand) {
         case COMMAND_DO_AUTHORIZATION:
-            inputDataStream >> from;
-            inputDataStream >> password;
-
-            isAuth = pDBManager->checkAuthorization(from, password, firstName, secondName);
-            mUserMap[from] = clientSocket;
-            sendAuthorizationStatusToClient(mUserMap[from], isAuth, firstName, secondName);
-
+            receiveToDoAuthorization(inputDataStream, clientSocket);
             break;
 
         case COMMAND_LOAD_USER_LIST:
-            inputDataStream >> from;
-
-            pDBManager->getUserList(from, userList);
-            sendUserListToClient(mUserMap[from], userList);
-
+            receiveToLoadUserList(inputDataStream);
             break;
 
         case COMMAND_LOAD_MESSAGE_LIST:
-            inputDataStream >> from;
-            inputDataStream >> to;
-
-            pDBManager->getMessageList(from, to, messageList);
-            sendMessageListToClient(mUserMap[from], to, messageList);
-
+            receiveToLoadMessageList(inputDataStream);
             break;
 
         case COMMAND_SEND_PM:
-            inputDataStream >> from;
-            inputDataStream >> to;
-            inputDataStream >> msg;
-
-            QString dateTime = QDateTime::currentDateTime().toString();
-            QString sended = "[" + dateTime + " " + from + "]\t\t" + msg;
-
-            if (mUserMap.contains(to)) {
-                sendPMToClient(mUserMap[to], from, sended);
-            }
-
-            if (mUserMap.contains(from)) {
-                sendPMToClient(mUserMap[from], to, sended);
-            }
-
-            emit sendMessageToDB(from, to, msg, dateTime);
-
+            receiveToSendPM(inputDataStream);
             break;
         }
     }
@@ -195,6 +164,7 @@ void TCPServer::sendMessageListToClient(QTcpSocket *_to, const QString &_from, c
     _to->write(arrBlock);
 }
 
+
 ///
 /// \brief TCPServer::sendPMToClient
 /// \param _to
@@ -212,5 +182,82 @@ void TCPServer::sendPMToClient(QTcpSocket *_to, const QString &_from, const QStr
     outputDataStream << quint16(static_cast<quint16>(arrBlock.size()) - sizeof(quint16));
 
     _to->write(arrBlock);
+}
+
+///
+/// \brief TCPServer::receiveToDoAuthorization
+/// \param _stream input data stream
+/// \param _socket input socket
+///
+void TCPServer::receiveToDoAuthorization(QDataStream& _stream, QTcpSocket* _socket) {
+    QString from = "";
+    QString password = "";
+    QString firstName = "";
+    QString secondName = "";
+    bool authorizationStatus = false;
+
+    _stream >> from;
+    _stream >> password;
+
+    authorizationStatus = pDBManager->checkAuthorization(from, password, firstName, secondName);
+    mUserMap[from] = _socket;
+    sendAuthorizationStatusToClient(mUserMap[from], authorizationStatus, firstName, secondName);
+}
+
+///
+/// \brief TCPServer::receiveToLoadUserList
+/// \param _stream
+///
+void TCPServer::receiveToLoadUserList(QDataStream &_stream) {
+    QString from = "";
+    QList<QString> userList;
+
+    _stream >> from;
+
+    pDBManager->getUserList(from, userList);
+    sendUserListToClient(mUserMap[from], userList);
+}
+
+///
+/// \brief TCPServer::receiveToLoadMessageList
+/// \param _stream
+///
+void TCPServer::receiveToLoadMessageList(QDataStream &_stream) {
+    QString from = "";
+    QString to = "";
+    QList<QString> messageList;
+
+    _stream >> from;
+    _stream >> to;
+
+    pDBManager->getMessageList(from, to, messageList);
+    sendMessageListToClient(mUserMap[from], to, messageList);
+}
+
+///
+/// \brief TCPServer::receiveToSendPM
+/// \param _stream input data stream
+///
+void TCPServer::receiveToSendPM(QDataStream &_stream) {
+    QString from = "";
+    QString to = "";
+    QString msg = "";
+
+    _stream >> from;
+    _stream >> to;
+    _stream >> msg;
+
+    QString dateTime = QDateTime::currentDateTime().toString();
+    QString sended = "[" + dateTime + " " + from + "]\t\t" + msg;
+
+    if (mUserMap.contains(to)) {
+        sendPMToClient(mUserMap[to], from, sended);
+    }
+
+    if (mUserMap.contains(from)) {
+        sendPMToClient(mUserMap[from], to, sended);
+    }
+
+    emit sendMessageToDB(from, to, msg, dateTime);
 }
 

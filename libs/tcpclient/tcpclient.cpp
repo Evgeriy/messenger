@@ -19,7 +19,6 @@ TCPClient::~TCPClient() {
     disconnect(pSocket, &QTcpSocket::connected, this, &TCPClient::onConnect);
     disconnect(pSocket, &QTcpSocket::disconnected, this, &TCPClient::onDisconnect);
     disconnect(pSocket, &QTcpSocket::readyRead, this, &TCPClient::onReadyRead);
-    //disconnect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
 
     if (pSocket != nullptr) {
         delete pSocket;
@@ -39,7 +38,6 @@ void TCPClient::connectToServer(const QHostAddress &_hostAddress, const quint16 
     connect(pSocket, &QTcpSocket::connected, this, &TCPClient::onConnect);
     connect(pSocket, &QTcpSocket::disconnected, this, &TCPClient::onDisconnect);
     connect(pSocket, &QTcpSocket::readyRead, this, &TCPClient::onReadyRead);
-    //connect(pSocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(slotError(QAbstractSocket::SocketError)));
 }
 
 ///
@@ -136,14 +134,6 @@ void TCPClient::loadMessageList(const QString &_user) {
 }
 
 ///
-/// \brief TCPClient::findUser
-/// \param _user
-///
-void TCPClient::findUser(const QString &_user) {
-
-}
-
-///
 /// \brief TCPClient::sendPM
 /// \param _to
 /// \param _msg
@@ -213,63 +203,108 @@ void TCPClient::onReadyRead() {
         int serverCommand;
         inputDataStream >> serverCommand;
 
-        QString currentUser;
-        QString currentMessage;
-        QString currentChat;
-        size_t listSize = 0;
-
         switch (serverCommand) {
         case static_cast<int>(COMMAND_SEND_AUTHORIZATION_STATUS):
-            inputDataStream >> mIsAuthorized;
-
-            if (mIsAuthorized) {
-                inputDataStream >> mFirstName;
-                inputDataStream >> mSecondName;
-            }
-            sendUserProfileToGUI(mFirstName, mSecondName);
-
+            receiveAuthorizationStatus(inputDataStream);
             break;
 
         case static_cast<int>(COMMAND_SEND_USER_LIST):
-            inputDataStream >> listSize;
-
-            mFriends.clear();
-            for (size_t i = 0; i < listSize; ++i) {
-                inputDataStream >> currentUser;
-                mFriends << currentUser;
-            }
-            emit sendUserListToGUI(mFriends);
-
+            receiveUserList(inputDataStream);
             break;
 
         case static_cast<int>(COMMAND_SEND_MESSAGE_LIST):
-            inputDataStream >> currentUser;
-            inputDataStream >> listSize;
-
-            mChats[currentUser].clear();
-            for (size_t i = 0; i < listSize; ++i) {
-                inputDataStream >> currentMessage;
-                mChats[currentUser] << currentMessage;
-            }
-            emit sendUserChatsToGUI(currentUser, mChats[currentUser]);
-
+            receiveMessageList(inputDataStream);
             break;
 
         case static_cast<int>(COMMAND_SEND_MESSAGE):
-            inputDataStream >> currentUser;
-            inputDataStream >> currentMessage;
-
-            mChats[currentUser] << currentMessage;
-            emit sendUserChatsToGUI(currentUser, mChats[currentUser]);
-
+            receiveMessage(inputDataStream);
             break;
         }
     }
 }
 
 ///
+/// \brief TCPClient::receiveRegistrationStatus
+/// \param _stream input data stream
+///
+void TCPClient::receiveRegistrationStatus(QDataStream &_stream) {
+    // TODO
+}
+
+///
+/// \brief TCPClient::receiveAuthorizationStatus
+/// \param _stream input data stream
+///
+void TCPClient::receiveAuthorizationStatus(QDataStream &_stream) {
+    _stream >> mIsAuthorized;
+
+    if (mIsAuthorized) {
+        _stream >> mFirstName;
+        _stream >> mSecondName;
+    }
+
+    emit sendUserProfileToGUI(mFirstName, mSecondName);
+}
+
+///
+/// \brief TCPClient::receiveUserList
+/// \param _stream input data stream
+///
+void TCPClient::receiveUserList(QDataStream &_stream) {
+    size_t listSize = 0;
+    QString currentUser = "";
+
+    _stream >> listSize;
+
+    mFriends.clear();
+    for (size_t i = 0; i < listSize; ++i) {
+        _stream >> currentUser;
+        mFriends << currentUser;
+    }
+
+    emit sendUserListToGUI(mFriends);
+}
+
+///
+/// \brief TCPClient::receiveMessageList
+/// \param _stream input data stream
+///
+void TCPClient::receiveMessageList(QDataStream &_stream) {
+    QString currentUser = "";
+    QString currentMessage = "";
+    size_t listSize = 0;
+
+    _stream >> currentUser;
+    _stream >> listSize;
+
+    mChats[currentUser].clear();
+    for (size_t i = 0; i < listSize; ++i) {
+        _stream >> currentMessage;
+        mChats[currentUser] << currentMessage;
+    }
+
+    emit sendUserChatsToGUI(currentUser, mChats[currentUser]);
+}
+
+///
+/// \brief TCPClient::receiveMessage
+/// \param _stream input data stream
+///
+void TCPClient::receiveMessage(QDataStream &_stream) {
+    QString currentUser = "";
+    QString currentMessage = "";
+
+    _stream >> currentUser;
+    _stream >> currentMessage;
+
+    mChats[currentUser] << currentMessage;
+
+    emit sendUserChatsToGUI(currentUser, mChats[currentUser]);
+}
+
+///
 /// \brief TCPClient::onError
-/// \param _error
+/// \param _error error
 ///
 void TCPClient::onError(QAbstractSocket::SocketError _error) const {
     switch (_error) {

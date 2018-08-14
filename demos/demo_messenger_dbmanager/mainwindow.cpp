@@ -53,6 +53,10 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow() {
+    disconnect(ui->pushButtonInsertUser, &QPushButton::clicked, this, &MainWindow::slotInsertNewUser);
+    disconnect(ui->pushButtonInsertPM, &QPushButton::clicked, this, &MainWindow::onPushButtonInsertPMClicked);
+    disconnect(ui->pushButtonInsertMessage, &QPushButton::clicked, this, &MainWindow::onPushButtonInsertMessageClicked);
+
     if (pUserTableModel != nullptr) {
         delete pUserTableModel;
         pUserTableModel = nullptr;

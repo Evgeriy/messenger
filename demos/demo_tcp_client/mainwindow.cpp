@@ -26,9 +26,28 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow() {
+    disconnect(ui->pushButtonLogIn, &QPushButton::clicked, this, &MainWindow::onPushButtonLogIn);
+    disconnect(ui->pushButtonSend, &QPushButton::clicked, this, &MainWindow::onPushButtonSend);
+    disconnect(ui->listViewUserList, &QListView::clicked, this, &MainWindow::onUserList);
+
+    disconnect(this, &MainWindow::sendActiveUser, pClient, &TCPClient::onSendUserChatsToGUI);
+    disconnect(pClient, &TCPClient::sendUserProfileToGUI, this, &MainWindow::updateUserProfile);
+    disconnect(pClient, &TCPClient::sendUserListToGUI, this, &MainWindow::updateUserListModel);
+    disconnect(pClient, &TCPClient::sendUserChatsToGUI, this, &MainWindow::updateUserChatModel);
+
     if (pClient != nullptr) {
         delete pClient;
         pClient = nullptr;
+    }
+
+    if (pUserListModel != nullptr) {
+        delete pUserListModel;
+        pUserListModel = nullptr;
+    }
+
+    if (pUserListModel != nullptr) {
+        delete pUserListModel;
+        pUserListModel = nullptr;
     }
 
     if (ui != nullptr) {

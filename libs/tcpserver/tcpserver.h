@@ -40,6 +40,12 @@ public:
                                  const  QList<QString>& _messageList);
     void sendPMToClient(QTcpSocket* _to, const QString& _from, const QString& _message);
 
+public:
+    void receiveToDoAuthorization(QDataStream& _stream, QTcpSocket* _socket);
+    void receiveToLoadUserList(QDataStream& _stream);
+    void receiveToLoadMessageList(QDataStream& _stream);
+    void receiveToSendPM(QDataStream& _stream);
+
 private:
     QTcpServer*                pTcpServer;
     DatabaseManager*           pDBManager;
