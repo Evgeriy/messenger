@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     pClient = new TCPClient(this);
-    pClient->connectToServer("192.168.0.117", 4000);
+    pClient->connectToServer("192.168.0.223", 4000);
 
     pUserListModel = new QStringListModel(this);
     ui->listViewUserList->setModel(pUserListModel);

@@ -6,8 +6,6 @@
 #include <QSqlDatabase>
 #include <QDebug>
 #include <QDateTime>
-#include <sys/types.h>
-#include <qlogging.h>
 
 #include "dbmanager_global.h"
 
@@ -32,9 +30,9 @@ public:
                             const QString& _password,
                                   QString& _firstName,
                                   QString& _secondName);
-    void getUserList(const QString&  _nik,
+    bool getUserList(const QString&  _nik,
                      QList<QString>& _userList);
-    void getMessageList(const QString&  _firstUser,
+    bool getMessageList(const QString&  _firstUser,
                         const QString&  _secondUser,
                         QList<QString>& _messageList);
 
@@ -53,6 +51,7 @@ public:
 private:
     int getUserIdByNik(const QString &_nik);
     int getPMChatIdByNiks(const QString &_firstNik, const QString &_secondNik);
+    bool isQueryExecuted(QSqlQuery &_query, const QString &_tableName, const QString &_desc = "");
 
 private:
     QSqlDatabase mDatabase;
