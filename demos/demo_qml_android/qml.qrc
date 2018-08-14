@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Favorites.qml</file>
+        <file>Feed.qml</file>
+        <file>qtquickcontrols2.conf</file>
+        <file>Chats.qml</file>
+        <file>Communities.qml</file>
+        <file>Settings.qml</file>
+        <file>favorites.png</file>
+        <file>feed.png</file>
+        <file>settings.png</file>
+        <file>chats.png</file>
+        <file>communities.png</file>
+    </qresource>
+</RCC>
