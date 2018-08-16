@@ -12,7 +12,7 @@
 class DatabaseManager : public QObject {
     Q_OBJECT
 public:
-    explicit DatabaseManager(QObject *_parent = nullptr, const QString &_pathToDatabase = "");
+    explicit DatabaseManager(QObject *_parent = nullptr);
     ~DatabaseManager();
 
 public:
@@ -55,7 +55,6 @@ private:
 
 private:
     QSqlDatabase mDatabase;
-    QString      mPathToDatabase;
 };
 
 #endif // DATABASEMANAGER_H

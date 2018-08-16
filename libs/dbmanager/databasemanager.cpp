@@ -6,15 +6,15 @@
 #include <QSql>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QDir>
 
 ///
 /// \brief DatabaseManager::DatabaseManager - constructor
 /// \param _parent - parent QObject object
 /// \param _pathToDatabase - path to file *.db
 ///
-DatabaseManager::DatabaseManager(QObject *_parent, const QString &_pathToDatabase) :
-    QObject(_parent),
-    mPathToDatabase(_pathToDatabase) {
+DatabaseManager::DatabaseManager(QObject *_parent) :
+    QObject(_parent) {
 
 }
 
@@ -32,7 +32,7 @@ DatabaseManager::~DatabaseManager() {
 bool DatabaseManager::initialize() {
     mDatabase = QSqlDatabase::addDatabase(DB_TYPE);
     mDatabase.setHostName(DB_HOSTNAME);
-    mDatabase.setDatabaseName(mPathToDatabase + DB_NAME);
+    mDatabase.setDatabaseName(DB_NAME);
 
     return mDatabase.open();
 }
@@ -44,7 +44,7 @@ bool DatabaseManager::initialize() {
 bool DatabaseManager::open() {
     bool retValue = false;
 
-    if (QFile(mPathToDatabase + DB_NAME).exists()) {
+    if (QFile(DB_NAME).exists()) {
         retValue = initialize();
     } else {
         retValue = initialize() && create();

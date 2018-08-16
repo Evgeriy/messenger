@@ -20,7 +20,7 @@ TCPServer::TCPServer(QObject *_parent, const quint16 &_port) :
         return;
     }
 
-    pDBManager = new DatabaseManager(this,  "../../../resources/");
+    pDBManager = new DatabaseManager(this);
     pDBManager->open();
 
     connect(pTcpServer, &QTcpServer::newConnection, this, &TCPServer::onNewConnection);

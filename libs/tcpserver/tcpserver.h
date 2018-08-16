@@ -13,7 +13,7 @@
 #include <QHostAddress>
 #include <QMessageBox>
 
-class TCPSERVERSHARED_EXPORT TCPServer : public QObject {
+class TCPServer : public QObject {
     Q_OBJECT
 public:
     explicit TCPServer(QObject *_parent = nullptr, const quint16 &_port = 4000);

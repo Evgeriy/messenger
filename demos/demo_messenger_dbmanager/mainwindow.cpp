@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
-    pDBManager = new DatabaseManager(this,  "../../resources/");
+    pDBManager = new DatabaseManager(this);
     pDBManager->open();
 
 //    pDBManager->insertPMChat("Evgeriy", "Third");
