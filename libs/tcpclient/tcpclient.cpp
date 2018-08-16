@@ -251,7 +251,7 @@ void TCPClient::receiveAuthorizationStatus(QDataStream &_stream) {
 /// \param _stream input data stream
 ///
 void TCPClient::receiveUserList(QDataStream &_stream) {
-    size_t listSize = 0;
+    int listSize;
     QString currentUser = "";
 
     _stream >> listSize;
@@ -272,7 +272,7 @@ void TCPClient::receiveUserList(QDataStream &_stream) {
 void TCPClient::receiveMessageList(QDataStream &_stream) {
     QString currentUser = "";
     QString currentMessage = "";
-    size_t listSize = 0;
+    int listSize = 0;
 
     _stream >> currentUser;
     _stream >> listSize;

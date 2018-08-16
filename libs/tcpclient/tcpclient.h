@@ -9,6 +9,8 @@
 #include <QTcpSocket>
 #include <QDataStream>
 #include <QHostAddress>
+#include <typeinfo>
+#include <ctype.h>
 
 class TCPCLIENTSHARED_EXPORT TCPClient : public QObject {
     Q_OBJECT
